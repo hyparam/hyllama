@@ -1,6 +1,6 @@
 {
   "name": "hyllama",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "llama.cpp gguf file parser for javascript",
   "scripts": {
     "build": "tsc",
@@ -12,8 +12,8 @@
     "@typescript-eslint/eslint-plugin": "6.16.0",
     "@vitest/coverage-v8": "1.1.0",
     "eslint": "8.56.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jsdoc": "^46.9.1",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jsdoc": "46.9.1",
     "typescript": "5.3.3",
     "vitest": "1.1.0"
   }
