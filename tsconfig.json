@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "lib": ["esnext"],
-    "outDir": "dist"
+    "outDir": "dist",
+    "sourceMap": true
   },
   "include": ["src"]
 }
