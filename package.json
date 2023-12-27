@@ -1,0 +1,10 @@
+{
+  "name": "hyllama",
+  "version": "1.0.0",
+  "description": "llama.cpp gguf file parser for javascript",
+  "scripts": {
+  },
+  "devDependencies": {
+    "typescript": "5.3.3"
+  }
+}
