@@ -1,5 +1,6 @@
 /**
- * Read GGUF metadata from a file
+ * Read llama.cpp GGUF metadata from a file
+ *
  * @param arrayBuffer gguf file contents
  * @returns metadata object
  */
@@ -36,10 +37,11 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
       return { value: view.getFloat32(offset, true), newOffset: offset + 4 }
     case 7: // BOOL
       return { value: view.getUint8(offset) !== 0, newOffset: offset + 1 }
-    case 8: // STRING
+    case 8: { // STRING
       const { string, newOffset } = readString(offset)
       return { value: string, newOffset }
-    case 9: // ARRAY
+    }
+    case 9: { // ARRAY
       const arrayType = view.getUint32(offset, true)
       const arrayLength = view.getBigUint64(offset + 4, true)
       let arrayOffset = offset + 12
@@ -50,6 +52,7 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
         arrayOffset = newOffset
       }
       return { value: arrayValues, newOffset: arrayOffset }
+    }
     default:
       throw new Error('Unsupported metadata type: ' + type)
     }
@@ -62,9 +65,12 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
   const tensorCount = view.getBigUint64(8, true)
   const metadataKVCount = view.getBigUint64(16, true)
 
+  const metadata: Record<string, any> = {}
+  metadata['version'] = version
+  metadata['tensorCount'] = tensorCount
+
   // initial offset after header
   let offset = 24
-  const metadata: Record<string, any> = {}
 
   for (let i = 0; i < metadataKVCount; i++) {
     // read key
