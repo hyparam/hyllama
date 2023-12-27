@@ -2,5 +2,6 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "outDir": "dist"
-  }
+  },
+  "include": ["src"]
 }
