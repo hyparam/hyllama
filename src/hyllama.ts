@@ -67,7 +67,7 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
 
   const metadata: Record<string, any> = {}
   metadata['version'] = version
-  metadata['tensorCount'] = tensorCount
+  metadata['tensorCount'] = castNumber(tensorCount)
 
   // initial offset after header
   let offset = 24
@@ -89,4 +89,12 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
   }
 
   return metadata
+}
+
+/**
+ * Cast a bigint to a number, if it is safe to do so
+ */
+function castNumber(value: bigint): number | bigint {
+  if (value > Number.MAX_SAFE_INTEGER) return value
+  return Number(value)
 }
