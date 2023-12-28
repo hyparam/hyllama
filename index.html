@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>GGUF File Parser</title>
+    <style>
+      #dropzone {
+        position: absolute;
+        bottom: 10px;
+        box-sizing: border-box;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        border: 2px dashed #08e;
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #444;
+        font-family: sans-serif;
+        font-size: 20px;
+        overflow-y: auto;
+      }
+      .over {
+        background-color: lightblue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dropzone">Drop GGUF model file here</div>
+    <script type="module">
+      import { ggufMetadata } from './dist/hyllama.js'
+
+      const dropZone = document.getElementById('dropzone')
+
+      dropZone.addEventListener('dragover', e => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'copy'
+        dropZone.classList.add('over')
+      })
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('over')
+      })
+
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault() // prevent file from being downloaded
+        dropZone.classList.remove('over')
+
+        const files = e.dataTransfer.files
+        if (files.length > 0) {
+          const file = files[0]
+          const reader = new FileReader()
+          reader.onload = async (e) => {
+            const arrayBuffer = e.target.result
+            const metadata = ggufMetadata(arrayBuffer)
+            console.log(metadata)
+            // these are large and of questionable value
+            delete metadata['tokenizer.ggml.tokens']
+            delete metadata['tokenizer.ggml.scores']
+            delete metadata['tokenizer.ggml.token_type']
+            // display metadata
+            dropZone.innerText = file.name
+            for (const key in metadata) {
+              const value = metadata[key]
+              dropZone.innerText += `\n${key}: ${value}`
+            }
+          }
+          reader.onerror = e => {
+            console.error('Error reading file', e)
+            dropZone.innerText = `Error reading file\n${e.target.error}`
+          }
+          reader.readAsArrayBuffer(file)
+        }
+      })
+    </script>
+  </body>
+</html>

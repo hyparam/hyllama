@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "outDir": "dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "target": "esnext",
   },
   "include": ["src"]
 }

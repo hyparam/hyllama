@@ -2,10 +2,21 @@
   "name": "hyllama",
   "version": "0.1.0",
   "description": "llama.cpp gguf file parser for javascript",
-  "keywords": [ "llama", "llamacpp", "gguf", "parser", "machine learning", "ml" ],
+  "keywords": [
+    "llama",
+    "llama.cpp",
+    "llama-cpp",
+    "llamacpp",
+    "gguf",
+    "parser",
+    "machine learning",
+    "ml"
+  ],
   "license": "MIT",
   "main": "dist/hyllama.js",
-  "files": [ "dist" ],
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/hyparam/hyllama"
@@ -13,6 +24,7 @@
   "scripts": {
     "build": "tsc",
     "coverage": "vitest run --coverage",
+    "demo": "http-server -o",
     "lint": "eslint . --ext .ts",
     "test": "vitest run"
   },
@@ -22,6 +34,7 @@
     "eslint": "8.56.0",
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-jsdoc": "46.9.1",
+    "http-server": "14.1.1",
     "typescript": "5.3.3",
     "vitest": "1.1.0"
   }
