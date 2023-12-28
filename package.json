@@ -7,6 +7,7 @@
     "llama.cpp",
     "llama-cpp",
     "llamacpp",
+    "llm",
     "gguf",
     "parser",
     "machine learning",
@@ -17,6 +18,8 @@
   "files": [
     "dist"
   ],
+  "type": "module",
+  "types": "dist/hyllama.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/hyparam/hyllama"
