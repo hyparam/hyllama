@@ -1,10 +1,12 @@
 # hyllama
 
+![hyllama](hyllama.jpg)
+
 [![mit license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![workflow status](https://github.com/hyparam/hyllama/actions/workflows/ci.yml/badge.svg)](https://github.com/hyparam/hyllama/actions)
 [![npm](https://img.shields.io/npm/v/hyllama)](https://www.npmjs.com/package/hyllama)
 
-Parser for llama.cpp gguf files written in javascript.
+Javascript parser for [llama.cpp](https://github.com/ggerganov/llama.cpp) gguf files.
 
 This library makes it easy to parse metadata from GGUF files.
 
