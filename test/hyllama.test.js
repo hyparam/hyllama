@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ggufMetadata } from '../src/hyllama'
+import { ggufMetadata } from '../src/hyllama.js'
 
 describe('ggufMetadata function', () => {
   it('parses metadata correctly', () => {

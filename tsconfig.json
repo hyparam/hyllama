@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
-    "declaration": true,
+    "allowJs": true,
+    "checkJs": true,
     "lib": ["esnext", "dom"],
-    "outDir": "dist",
-    "sourceMap": true,
+    "module": "nodenext",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
     "target": "esnext",
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }

@@ -1,15 +1,22 @@
 /**
  * Read llama.cpp GGUF metadata from a file
  *
- * @param arrayBuffer gguf file contents
- * @returns metadata object
+ * Decoded is an object with newOffset and value properties
+ *
+ * @typedef {{ newOffset: number, value: any }} Decoded
+ * @param {ArrayBuffer} arrayBuffer gguf file contents
+ * @returns {Record<string, any>} metadata object
  */
-export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
+export function ggufMetadata(arrayBuffer) {
   // DataView for easier manipulation of the buffer
   const view = new DataView(arrayBuffer)
 
-  // helper function to read string from DataView
-  function readString(offset: number): { string: string, newOffset: number } {
+  /**
+   * Helper function to read string from DataView
+   * @param {number} offset
+   * @returns {{ string: string, newOffset: number }}
+   */
+  function readString(offset) {
     const length = view.getBigUint64(offset, true)
     let string = ''
     for (let i = 0; i < length; i++) {
@@ -18,8 +25,13 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
     return { string, newOffset: offset + 8 + Number(length) }
   }
 
-  // helper function to read metadata value based on type
-  function readMetadataValue(type: number, offset: number): { value: any, newOffset: number } {
+  /**
+   * Helper function to read metadata value based on type
+   * @param {number} type
+   * @param {number} offset
+   * @returns {Decoded}
+   */
+  function readMetadataValue(type, offset) {
     switch (type) {
     case 0: // UINT8
       return { value: view.getUint8(offset), newOffset: offset + 1 }
@@ -65,7 +77,8 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
   const tensorCount = view.getBigUint64(8, true)
   const metadataKVCount = view.getBigUint64(16, true)
 
-  const metadata: Record<string, any> = {}
+  /** @type Record<string, any> */
+  const metadata = {}
   metadata['version'] = version
   metadata['tensorCount'] = castNumber(tensorCount)
 
@@ -93,8 +106,10 @@ export function ggufMetadata(arrayBuffer: ArrayBuffer): Record<string, any> {
 
 /**
  * Cast a bigint to a number, if it is safe to do so
+ * @param {bigint} value
+ * @returns {number | bigint}
  */
-function castNumber(value: bigint): number | bigint {
+function castNumber(value) {
   if (value > Number.MAX_SAFE_INTEGER) return value
   return Number(value)
 }
