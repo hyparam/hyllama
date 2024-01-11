@@ -1,9 +1,6 @@
 /**
  * Read llama.cpp GGUF metadata from a file
  *
- * Decoded is an object with newOffset and value properties
- *
- * @typedef {{ newOffset: number, value: any }} Decoded
  * @param {ArrayBuffer} arrayBuffer gguf file contents
  * @returns {Record<string, any>} metadata object
  */
@@ -27,6 +24,10 @@ export function ggufMetadata(arrayBuffer) {
 
   /**
    * Helper function to read metadata value based on type
+   *
+   * Decoded is an object with newOffset and value properties
+   *
+   * @typedef {{ newOffset: number, value: any }} Decoded
    * @param {number} type
    * @param {number} offset
    * @returns {Decoded}

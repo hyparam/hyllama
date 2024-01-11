@@ -2,9 +2,10 @@
 
 ![hyllama](hyllama.jpg)
 
-[![mit license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![workflow status](https://github.com/hyparam/hyllama/actions/workflows/ci.yml/badge.svg)](https://github.com/hyparam/hyllama/actions)
 [![npm](https://img.shields.io/npm/v/hyllama)](https://www.npmjs.com/package/hyllama)
+[![workflow status](https://github.com/hyparam/hyllama/actions/workflows/ci.yml/badge.svg)](https://github.com/hyparam/hyllama/actions)
+[![mit license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![dependencies](https://img.shields.io/badge/Dependencies-0-blueviolet)
 
 Javascript parser for [llama.cpp](https://github.com/ggerganov/llama.cpp) gguf files.
 
@@ -21,17 +22,38 @@ A goal of this library is to parse the file efficiently, without loading the ent
 
 Dependency free since 2023!
 
-## Usage
+## Installation
 
 ```bash
 npm install hyllama
 ```
 
+## Usage
+
+If you're in a node.js environment, you can load a .gguf file with the following example:
+
+```js
+const { ggufMetadata } = await import('hyllama')
+const fs = await import('fs')
+
+const buffer = fs.readFileSync('example.gguf')
+const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+const metadata = ggufMetadata(arrayBuffer)
+```
+
+If you're in a browser environment, you'll probably get parquet file data from either a drag-and-dropped file from the user, or downloaded from the web.
+
+To load parquet data in the browser from a remote server using `fetch`:
+
 ```js
 import { ggufMetadata } from 'hyllama'
 
+const res = await fetch(url)
+const arrayBuffer = await res.arrayBuffer()
 const metadata = ggufMetadata(arrayBuffer)
 ```
+
+To parse .gguf files from a user drag-and-drop action, see example in [index.html](index.html).
 
 ## References
 

@@ -45,7 +45,7 @@
       })
 
       dropZone.addEventListener('drop', e => {
-        e.preventDefault() // prevent file from being downloaded
+        e.preventDefault() // prevent dropped file from being "downloaded"
         dropZone.classList.remove('over')
 
         const files = e.dataTransfer.files

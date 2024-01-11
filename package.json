@@ -22,7 +22,7 @@
   "types": "src/hyllama.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyparam/hyllama"
+    "url": "git+https://github.com/hyparam/hyllama.git"
   },
   "scripts": {
     "coverage": "vitest run --coverage",
@@ -32,12 +32,12 @@
     "typecheck": "tsc"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "1.1.1",
+    "@vitest/coverage-v8": "1.1.3",
     "eslint": "8.56.0",
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-jsdoc": "48.0.2",
     "http-server": "14.1.1",
     "typescript": "5.3.3",
-    "vitest": "1.1.1"
+    "vitest": "1.1.3"
   }
 }
