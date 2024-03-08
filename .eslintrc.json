@@ -5,6 +5,7 @@
   "extends": [
     "eslint:recommended"
   ],
+  "globals": { "fetch": false },
   "ignorePatterns": [
     "coverage/",
     "node_modules/"
