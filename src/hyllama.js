@@ -102,7 +102,38 @@ export function ggufMetadata(arrayBuffer) {
     metadata[keyResult.string] = valueResult.value
   }
 
-  return metadata
+  const tensorInfos = []
+
+  for (let i = 0; i < tensorCount; i++) {
+    // read tensor name
+    const keyResult = readString(offset)
+    offset = keyResult.newOffset
+
+    const nDims = view.getUint32(offset, true)
+    offset += 4
+
+    /** @type bigint[] */
+    const shape = []
+    for (let dim = 0; dim < nDims; dim++) {
+      shape.push(view.getBigUint64(offset, true))
+      offset += 8
+    }
+
+    const type = view.getUint32(offset, true)
+    offset += 4
+    const tensorOffset = view.getBigUint64(offset, true)
+    offset += 8
+
+    tensorInfos.push({
+      name: keyResult.string,
+      nDims,
+      shape,
+      type,
+      offset: tensorOffset,
+    })
+  }
+
+  return { metadata, tensorInfos }
 }
 
 /**
