@@ -41,9 +41,9 @@ const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + b
 const metadata = ggufMetadata(arrayBuffer)
 ```
 
-If you're in a browser environment, you'll probably get parquet file data from either a drag-and-dropped file from the user, or downloaded from the web.
+If you're in a browser environment, you'll probably get .gguf file data from either a drag-and-dropped file from the user, or downloaded from the web.
 
-To load parquet data in the browser from a remote server using `fetch`:
+To load .gguf data in the browser from a remote server using `fetch`:
 
 ```js
 import { ggufMetadata } from 'hyllama'
