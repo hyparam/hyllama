@@ -142,6 +142,5 @@ export function ggufMetadata(arrayBuffer) {
  * @returns {number | bigint}
  */
 function castNumber(value) {
-  if (value > Number.MAX_SAFE_INTEGER) return value
-  return Number(value)
+  return value > Number.MAX_SAFE_INTEGER ? value : Number(value)
 }
