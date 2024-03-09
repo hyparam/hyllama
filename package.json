@@ -1,6 +1,6 @@
 {
   "name": "hyllama",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "llama.cpp gguf file parser for javascript",
   "keywords": [
     "llama",
