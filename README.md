@@ -37,8 +37,8 @@ const { ggufMetadata } = await import('hyllama')
 const fs = await import('fs')
 
 const buffer = fs.readFileSync('example.gguf')
-const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
-const metadata = ggufMetadata(arrayBuffer)
+const arrayBuffer = new Uint8Array(buffer).buffer
+const { metadata, tensorInfos } = ggufMetadata(arrayBuffer)
 ```
 
 If you're in a browser environment, you'll probably get .gguf file data from either a drag-and-dropped file from the user, or downloaded from the web.
@@ -50,7 +50,7 @@ import { ggufMetadata } from 'hyllama'
 
 const res = await fetch(url)
 const arrayBuffer = await res.arrayBuffer()
-const metadata = ggufMetadata(arrayBuffer)
+const { metadata, tensorInfos } = ggufMetadata(arrayBuffer)
 ```
 
 To parse .gguf files from a user drag-and-drop action, see example in [index.html](index.html).
