@@ -36,9 +36,14 @@ If you're in a node.js environment, you can load a .gguf file with the following
 const { ggufMetadata } = await import('hyllama')
 const fs = await import('fs')
 
-const buffer = fs.readFileSync('example.gguf')
-const arrayBuffer = new Uint8Array(buffer).buffer
-const { metadata, tensorInfos } = ggufMetadata(arrayBuffer)
+// Read first 1mb of gguf file
+const fd = fs.openSync('example.gguf', 'r')
+const buffer = new Uint8Array(1000000)
+fs.readSync(fd, buffer, 0, 1000000, 0)
+fs.closeSync(fd)
+
+// Parse metadata and tensor info
+const { metadata, tensorInfos } = ggufMetadata(buffer.buffer)
 ```
 
 If you're in a browser environment, you'll probably get .gguf file data from either a drag-and-dropped file from the user, or downloaded from the web.
