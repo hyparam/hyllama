@@ -30,35 +30,47 @@ npm install hyllama
 
 ## Usage
 
+### Node.js
+
 If you're in a node.js environment, you can load a .gguf file with the following example:
 
 ```js
 const { ggufMetadata } = await import('hyllama')
 const fs = await import('fs')
 
-// Read first 1mb of gguf file
+// Read first 10mb of gguf file
 const fd = fs.openSync('example.gguf', 'r')
-const buffer = new Uint8Array(1000000)
-fs.readSync(fd, buffer, 0, 1000000, 0)
+const buffer = new Uint8Array(10_000_000)
+fs.readSync(fd, buffer, 0, 10_000_000, 0)
 fs.closeSync(fd)
 
 // Parse metadata and tensor info
 const { metadata, tensorInfos } = ggufMetadata(buffer.buffer)
 ```
 
+### Browser
+
 If you're in a browser environment, you'll probably get .gguf file data from either a drag-and-dropped file from the user, or downloaded from the web.
 
-To load .gguf data in the browser from a remote server using `fetch`:
+To load .gguf data in the browser from a remote `url`, it is recommended that you use an [HTTP range request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests) to get just the first bytes:
 
 ```js
 import { ggufMetadata } from 'hyllama'
 
-const res = await fetch(url)
+const headers = new Headers({ Range: 'bytes=0-10000000' })
+const res = await fetch(url, { headers })
 const arrayBuffer = await res.arrayBuffer()
 const { metadata, tensorInfos } = ggufMetadata(arrayBuffer)
 ```
 
 To parse .gguf files from a user drag-and-drop action, see example in [index.html](index.html).
+
+## File Size
+
+Since .gguf files are typically very large, it is recommended that you only load the start of the file that contains the metadata.
+How many bytes you need for the metadata depends on the gguf file.
+In practice, most .gguf files have metadata that takes up a few megabytes.
+If you get an error "RangeError: Offset is outside the bounds of the DataView" then you probably didn't fetch enough bytes.
 
 ## References
 
