@@ -65,14 +65,19 @@ export function ggufMetadata(arrayBuffer) {
       }
       return { value: arrayValues, byteLength: arrayOffset }
     }
+    case 10: // UINT64
+      return { value: view.getBigUint64(offset, true), byteLength: 8 }
+    case 11: // INT64
+      return { value: view.getBigInt64(offset, true), byteLength: 8 }
+    case 12: // FLOAT64
+      return { value: view.getFloat64(offset, true), byteLength: 8 }
     default:
       throw new Error('Unsupported metadata type: ' + type)
     }
   }
 
   // read the header
-  const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3))
-  if (magic !== 'GGUF') throw new Error('Not a valid GGUF file')
+  if (view.getUint32(0) !== 1195857222) throw new Error('Not a valid GGUF file') // "GGUF" header
   const version = view.getUint32(4, true)
   const tensorCount = view.getBigUint64(8, true)
   const metadataKVCount = view.getBigUint64(16, true)
