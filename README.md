@@ -16,10 +16,10 @@ llama.cpp was originally an implementation of meta's llama model in C++, particu
 But it has quickly evolved into a powerful tool for running various trained LLM models, on cpu or gpu.
 The runtime has minimal dependencies and so is easy to deploy.
 Model files are frequently distributed as .gguf files which contain all the info needed to run a model including architecture and weights.
-[TheBloke](https://huggingface.co/TheBloke) provides a great collection of serialized gguf model files, at varying levels of quantization.
+[Hugging Face](https://huggingface.co/models?library=gguf) provides a great collection of serialized gguf model files, at varying levels of quantization.
 
 Model files are often very large.
-A goal of this library is to parse the file efficiently, without loading the entire file into memory.
+A goal of this library is to parse the file efficiently, without loading the entire file.
 
 Dependency free since 2023!
 
@@ -77,4 +77,11 @@ If you get an error "RangeError: Offset is outside the bounds of the DataView" t
 
  - https://github.com/ggerganov/llama.cpp
  - https://github.com/ggerganov/ggml/blob/master/docs/gguf.md
+ - https://huggingface.co/models?library=gguf
  - https://huggingface.co/TheBloke
+
+## Contributions
+
+Contributions are welcome!
+
+Hyparquet development is supported by an open-source grant from Hugging Face :hugs:
