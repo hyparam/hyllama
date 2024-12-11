@@ -3,10 +3,11 @@
 ![hyllama](hyllama.jpg)
 
 [![npm](https://img.shields.io/npm/v/hyllama)](https://www.npmjs.com/package/hyllama)
+[![minzipped](https://img.shields.io/bundlephobia/minzip/hyllama)](https://www.npmjs.com/package/hyllama)
 [![workflow status](https://github.com/hyparam/hyllama/actions/workflows/ci.yml/badge.svg)](https://github.com/hyparam/hyllama/actions)
-[![mit license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-![dependencies](https://img.shields.io/badge/Dependencies-0-blueviolet)
+[![mit license](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 ![coverage](https://img.shields.io/badge/Coverage-100-darkred)
+![dependencies](https://img.shields.io/badge/Dependencies-0-blueviolet)
 
 Javascript parser for [llama.cpp](https://github.com/ggerganov/llama.cpp) gguf files.
 
@@ -78,7 +79,6 @@ If you get an error "RangeError: Offset is outside the bounds of the DataView" t
  - https://github.com/ggerganov/llama.cpp
  - https://github.com/ggerganov/ggml/blob/master/docs/gguf.md
  - https://huggingface.co/models?library=gguf
- - https://huggingface.co/TheBloke
 
 ## Contributions
 
