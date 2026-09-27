@@ -99,6 +99,35 @@ describe('ggufMetadata function', () => {
     })
   })
 
+  it('decodes a utf-8 metadata string', () => {
+    const text = 'café'
+    const bytes = new TextEncoder().encode(text)
+    const buffer = new ArrayBuffer(64)
+    const view = new DataView(buffer)
+    view.setUint8(0, 'G'.charCodeAt(0))
+    view.setUint8(1, 'G'.charCodeAt(0))
+    view.setUint8(2, 'U'.charCodeAt(0))
+    view.setUint8(3, 'F'.charCodeAt(0))
+    view.setUint32(4, 3, true)
+    view.setBigUint64(8, 0n, true)
+    view.setBigUint64(16, 1n, true)
+
+    const key = 'general.name'
+    view.setBigUint64(24, BigInt(key.length), true)
+    for (let i = 0; i < key.length; i++) {
+      view.setUint8(32 + i, key.charCodeAt(i))
+    }
+    const valueTypeAt = 32 + key.length
+    view.setUint32(valueTypeAt, 8, true) // STRING
+    view.setBigUint64(valueTypeAt + 4, BigInt(bytes.length), true)
+    for (let i = 0; i < bytes.length; i++) {
+      view.setUint8(valueTypeAt + 12 + i, bytes[i])
+    }
+
+    const { metadata } = ggufMetadata(buffer)
+    expect(metadata[key]).toEqual(text)
+  })
+
   it('throws an error for non-GGUF file', () => {
     const buffer = new ArrayBuffer(4)
     const view = new DataView(buffer)

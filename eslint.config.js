@@ -10,6 +10,8 @@ export default [
     languageOptions: {
       globals: {
         'fetch': false,
+        'TextDecoder': false,
+        'TextEncoder': false,
       },
     },
 
