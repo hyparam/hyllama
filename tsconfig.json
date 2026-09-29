@@ -9,6 +9,7 @@
     "skipLibCheck": false,
     "strict": true,
     "target": "esnext",
+    "types": ["node"],
   },
   "include": ["src", "test"]
 }

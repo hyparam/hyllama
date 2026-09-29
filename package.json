@@ -34,12 +34,13 @@
     "typecheck": "tsc"
   },
   "devDependencies": {
-    "@types/node": "22.10.1",
-    "@vitest/coverage-v8": "2.1.8",
-    "eslint": "9.16.0",
-    "eslint-plugin-jsdoc": "50.6.1",
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.3",
+    "@vitest/coverage-v8": "5.0.2",
+    "eslint": "10.11.0",
+    "eslint-plugin-jsdoc": "65.0.0",
     "http-server": "14.1.1",
-    "typescript": "5.7.2",
-    "vitest": "2.1.8"
+    "typescript": "7.0.2",
+    "vitest": "5.0.2"
   }
 }
