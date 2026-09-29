@@ -15,7 +15,7 @@ export function ggufMetadata(arrayBuffer) {
    * @returns {{ byteLength: number, value: string }}
    */
   function readString(offset) {
-    const length = Number(view.getBigUint64(offset, true))
+    const length = Number(view.getBigUint64(offset, littleEndian))
     const bytes = new Uint8Array(arrayBuffer, offset + 8, length)
     return { byteLength: 8 + length, value: utf8.decode(bytes) }
   }
@@ -37,23 +37,23 @@ export function ggufMetadata(arrayBuffer) {
     case 1: // INT8
       return { value: view.getInt8(offset), byteLength: 1 }
     case 2: // UINT16
-      return { value: view.getUint16(offset, true), byteLength: 2 }
+      return { value: view.getUint16(offset, littleEndian), byteLength: 2 }
     case 3: // INT16
-      return { value: view.getInt16(offset, true), byteLength: 2 }
+      return { value: view.getInt16(offset, littleEndian), byteLength: 2 }
     case 4: // UINT32
-      return { value: view.getUint32(offset, true), byteLength: 4 }
+      return { value: view.getUint32(offset, littleEndian), byteLength: 4 }
     case 5: // INT32
-      return { value: view.getInt32(offset, true), byteLength: 4 }
+      return { value: view.getInt32(offset, littleEndian), byteLength: 4 }
     case 6: // FLOAT32
-      return { value: view.getFloat32(offset, true), byteLength: 4 }
+      return { value: view.getFloat32(offset, littleEndian), byteLength: 4 }
     case 7: // BOOL
       return { value: view.getUint8(offset) !== 0, byteLength: 1 }
     case 8: { // STRING
       return readString(offset)
     }
     case 9: { // ARRAY
-      const arrayType = view.getUint32(offset, true)
-      const arrayLength = view.getBigUint64(offset + 4, true)
+      const arrayType = view.getUint32(offset, littleEndian)
+      const arrayLength = view.getBigUint64(offset + 4, littleEndian)
       let arrayOffset = 12
       const arrayValues = []
       for (let i = 0; i < arrayLength; i++) {
@@ -64,11 +64,11 @@ export function ggufMetadata(arrayBuffer) {
       return { value: arrayValues, byteLength: arrayOffset }
     }
     case 10: // UINT64
-      return { value: view.getBigUint64(offset, true), byteLength: 8 }
+      return { value: view.getBigUint64(offset, littleEndian), byteLength: 8 }
     case 11: // INT64
-      return { value: view.getBigInt64(offset, true), byteLength: 8 }
+      return { value: view.getBigInt64(offset, littleEndian), byteLength: 8 }
     case 12: // FLOAT64
-      return { value: view.getFloat64(offset, true), byteLength: 8 }
+      return { value: view.getFloat64(offset, littleEndian), byteLength: 8 }
     default:
       throw new Error('Unsupported metadata type: ' + type)
     }
@@ -76,10 +76,12 @@ export function ggufMetadata(arrayBuffer) {
 
   // read the header
   if (view.getUint32(0) !== 1195857222) throw new Error('Not a valid GGUF file') // "GGUF" header
-  const version = view.getUint32(4, true)
+  // Big-endian GGUF v3 stores the version bytes as 00 00 00 03.
+  const littleEndian = view.getUint32(4, true) !== 0x03000000
+  const version = view.getUint32(4, littleEndian)
   if (version !== 2 && version !== 3) throw new Error('Unsupported GGUF version: ' + version)
-  const tensorCount = view.getBigUint64(8, true)
-  const metadataKVCount = view.getBigUint64(16, true)
+  const tensorCount = view.getBigUint64(8, littleEndian)
+  const metadataKVCount = view.getBigUint64(16, littleEndian)
 
   /** @type Record<string, any> */
   const metadata = {}
@@ -95,7 +97,7 @@ export function ggufMetadata(arrayBuffer) {
     offset += keyResult.byteLength
 
     // read value type
-    const valueType = view.getUint32(offset, true)
+    const valueType = view.getUint32(offset, littleEndian)
     offset += 4
 
     // read value
@@ -112,19 +114,19 @@ export function ggufMetadata(arrayBuffer) {
     const keyResult = readString(offset)
     offset += keyResult.byteLength
 
-    const nDims = view.getUint32(offset, true)
+    const nDims = view.getUint32(offset, littleEndian)
     offset += 4
 
     /** @type bigint[] */
     const shape = []
     for (let dim = 0; dim < nDims; dim++) {
-      shape.push(view.getBigUint64(offset, true))
+      shape.push(view.getBigUint64(offset, littleEndian))
       offset += 8
     }
 
-    const type = view.getUint32(offset, true)
+    const type = view.getUint32(offset, littleEndian)
     offset += 4
-    const tensorOffset = view.getBigUint64(offset, true)
+    const tensorOffset = view.getBigUint64(offset, littleEndian)
     offset += 8
 
     tensorInfos.push({

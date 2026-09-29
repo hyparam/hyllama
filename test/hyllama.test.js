@@ -157,6 +157,121 @@ describe('ggufMetadata function', () => {
     expect(metadata[key]).toEqual(text)
   })
 
+  it('parses big-endian metadata and tensor info', () => {
+    // DataView writes are big-endian when the littleEndian argument is omitted.
+    const buffer = new ArrayBuffer(2048)
+    const view = new DataView(buffer)
+    const utf8 = new TextEncoder()
+    // Each scalar entry contains its GGUF type, setter, byte size, and value.
+    /** @type {[number, (offset: number, value: any, littleEndian?: boolean) => void, number, any][]} */
+    const scalars = [
+      [0, view.setUint8, 1, 231],
+      [1, view.setInt8, 1, -42],
+      [2, view.setUint16, 2, 0x1234],
+      [3, view.setInt16, 2, -1234],
+      [4, view.setUint32, 4, 0x12345678],
+      [5, view.setInt32, 4, -12345678],
+      [6, view.setFloat32, 4, 1.25],
+      [7, view.setUint8, 1, 1],
+      [10, view.setBigUint64, 8, 0x123456789abcdef0n],
+      [11, view.setBigInt64, 8, -0x123456789abcdef0n],
+      [12, view.setFloat64, 8, -123.125],
+    ]
+    new Uint8Array(buffer, 0, 4).set([71, 71, 85, 70]) // GGUF in either byte order
+    view.setUint32(4, 3) // version
+    view.setBigUint64(8, 1n) // tensor count
+    view.setBigUint64(16, BigInt(scalars.length + 3)) // metadata count
+    let offset = 24
+    /** @type {Record<string, any>} */
+    const expectedMetadata = { version: 3, tensorCount: 1 }
+    for (const [type, method, size, value] of scalars) {
+      const key = 'test.scalar.' + type
+      const bytes = utf8.encode(key)
+      view.setBigUint64(offset, BigInt(bytes.length))
+      new Uint8Array(buffer, offset + 8, bytes.length).set(bytes)
+      offset += 8 + bytes.length
+      view.setUint32(offset, type)
+      offset += 4
+      method.call(view, offset, value, false)
+      offset += size
+      expectedMetadata[key] = type === 7 ? true : value
+    }
+    // String lengths count UTF-8 bytes, including multibyte characters.
+    const nameKey = utf8.encode('general.name')
+    view.setBigUint64(offset, BigInt(nameKey.length))
+    new Uint8Array(buffer, offset + 8, nameKey.length).set(nameKey)
+    offset += 8 + nameKey.length
+    view.setUint32(offset, 8)
+    offset += 4
+    const nameValue = utf8.encode('café 🦙')
+    view.setBigUint64(offset, BigInt(nameValue.length))
+    new Uint8Array(buffer, offset + 8, nameValue.length).set(nameValue)
+    offset += 8 + nameValue.length
+    expectedMetadata['general.name'] = 'café 🦙'
+    // An INT32 array: element type and count precede the two values.
+    const arrayKey = utf8.encode('test.array')
+    view.setBigUint64(offset, BigInt(arrayKey.length))
+    new Uint8Array(buffer, offset + 8, arrayKey.length).set(arrayKey)
+    offset += 8 + arrayKey.length
+    view.setUint32(offset, 9)
+    offset += 4
+    view.setUint32(offset, 5)
+    offset += 4
+    view.setBigUint64(offset, 2n)
+    offset += 8
+    view.setInt32(offset, -12345678)
+    offset += 4
+    view.setInt32(offset, 0x12345678)
+    offset += 4
+    expectedMetadata['test.array'] = [-12345678, 0x12345678]
+    // A string array with a multibyte value and an empty value.
+    const stringsKey = utf8.encode('test.strings')
+    view.setBigUint64(offset, BigInt(stringsKey.length))
+    new Uint8Array(buffer, offset + 8, stringsKey.length).set(stringsKey)
+    offset += 8 + stringsKey.length
+    view.setUint32(offset, 9)
+    offset += 4
+    view.setUint32(offset, 8)
+    offset += 4
+    view.setBigUint64(offset, 2n)
+    offset += 8
+    const stringValue = utf8.encode('世界')
+    view.setBigUint64(offset, BigInt(stringValue.length))
+    new Uint8Array(buffer, offset + 8, stringValue.length).set(stringValue)
+    offset += 8 + stringValue.length
+    const emptyString = utf8.encode('')
+    view.setBigUint64(offset, BigInt(emptyString.length))
+    new Uint8Array(buffer, offset + 8, emptyString.length).set(emptyString)
+    offset += 8 + emptyString.length
+    expectedMetadata['test.strings'] = ['世界', '']
+    // Tensor descriptor: name, dimension count, shape, type, and 64-bit offset.
+    const tensorName = utf8.encode('tensor.weight')
+    view.setBigUint64(offset, BigInt(tensorName.length))
+    new Uint8Array(buffer, offset + 8, tensorName.length).set(tensorName)
+    offset += 8 + tensorName.length
+    view.setUint32(offset, 2)
+    offset += 4
+    view.setBigUint64(offset, 256n)
+    offset += 8
+    view.setBigUint64(offset, 512n)
+    offset += 8
+    view.setUint32(offset, 12) // Q4_K
+    offset += 4
+    view.setBigUint64(offset, 0x123456780n)
+    offset += 8
+
+    expect(ggufMetadata(buffer.slice(0, offset))).toEqual({
+      metadata: expectedMetadata,
+      tensorInfos: [{
+        name: 'tensor.weight',
+        nDims: 2,
+        shape: [256n, 512n],
+        type: 12,
+        offset: 0x123456780n,
+      }],
+    })
+  })
+
   it.each([2, 3])('accepts GGUF version %i', (version) => {
     const buffer = new ArrayBuffer(24)
     const view = new DataView(buffer)
@@ -169,7 +284,7 @@ describe('ggufMetadata function', () => {
     })
   })
 
-  it.each([0, 1, 4, 99, 0xffffffff, 0x03000000])('rejects GGUF version %i before reading counts', (version) => {
+  it.each([0, 1, 4, 99, 0xffffffff, 0x04000000])('rejects GGUF version %i before reading counts', (version) => {
     const buffer = new ArrayBuffer(8)
     const view = new DataView(buffer)
     view.setUint32(0, 0x47475546) // GGUF
