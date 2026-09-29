@@ -7,6 +7,7 @@
 export function ggufMetadata(arrayBuffer) {
   // DataView for easier manipulation of the buffer
   const view = new DataView(arrayBuffer)
+  const utf8 = new TextDecoder('utf-8', { ignoreBOM: true })
 
   /**
    * Helper function to read string from DataView
@@ -14,12 +15,9 @@ export function ggufMetadata(arrayBuffer) {
    * @returns {{ byteLength: number, value: string }}
    */
   function readString(offset) {
-    const length = view.getBigUint64(offset, true)
-    let value = ''
-    for (let i = 0; i < length; i++) {
-      value += String.fromCharCode(view.getUint8(offset + 8 + i))
-    }
-    return { byteLength: 8 + Number(length), value }
+    const length = Number(view.getBigUint64(offset, true))
+    const bytes = new Uint8Array(arrayBuffer, offset + 8, length)
+    return { byteLength: 8 + length, value: utf8.decode(bytes) }
   }
 
   /**
