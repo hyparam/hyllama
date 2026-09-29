@@ -90,6 +90,7 @@ export function ggufMetadata(arrayBuffer) {
 
   // initial offset after header
   let offset = 24
+  let alignment = 32
 
   for (let i = 0; i < metadataKVCount; i++) {
     // read key
@@ -103,6 +104,13 @@ export function ggufMetadata(arrayBuffer) {
     // read value
     const valueResult = readMetadataValue(valueType, offset)
     offset += valueResult.byteLength
+
+    if (keyResult.value === 'general.alignment') {
+      alignment = valueResult.value
+      if (valueType !== 4 || alignment === 0 || (alignment & alignment - 1) !== 0) {
+        throw new Error('Invalid general.alignment: expected a non-zero power-of-two UINT32')
+      }
+    }
 
     metadata[keyResult.value] = valueResult.value
   }
@@ -138,7 +146,9 @@ export function ggufMetadata(arrayBuffer) {
     })
   }
 
-  return { metadata, tensorInfos }
+  // Files without tensors have no data section to align.
+  const dataOffset = tensorCount === 0n ? offset : Math.ceil(offset / alignment) * alignment
+  return { metadata, tensorInfos, dataOffset }
 }
 
 /**

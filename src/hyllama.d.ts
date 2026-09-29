@@ -6,6 +6,8 @@
  */
 export declare function ggufMetadata(arrayBuffer: ArrayBuffer): {
   metadata: Record<string, any>
+  /** File offset of tensor data, or end of metadata when there are no tensors. */
+  dataOffset: number
   tensorInfos: {
     name: string
     nDims: number
