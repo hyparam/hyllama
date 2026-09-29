@@ -262,6 +262,7 @@ describe('ggufMetadata function', () => {
 
     expect(ggufMetadata(buffer.slice(0, offset))).toEqual({
       metadata: expectedMetadata,
+      dataOffset: Math.ceil(offset / 32) * 32,
       tensorInfos: [{
         name: 'tensor.weight',
         nDims: 2,
@@ -270,6 +271,62 @@ describe('ggufMetadata function', () => {
         offset: 0x123456780n,
       }],
     })
+  })
+
+  it('aligns tensor data to 32 bytes by default without requiring tensor data in the buffer', () => {
+    const buffer = new ArrayBuffer(57)
+    const view = new DataView(buffer)
+    view.setUint32(0, 0x47475546) // GGUF
+    view.setUint32(4, 3, true)
+    view.setBigUint64(8, 1n, true)
+
+    // One F32 tensor named x; the descriptor ends at byte 57.
+    view.setBigUint64(24, 1n, true)
+    view.setUint8(32, 120)
+    view.setUint32(33, 1, true)
+    view.setBigUint64(37, 1n, true)
+
+    const { dataOffset, tensorInfos } = ggufMetadata(buffer)
+    expect(dataOffset).toBe(64)
+    expect(BigInt(dataOffset) + tensorInfos[0].offset).toBe(64n)
+  })
+
+  it('honors custom alignment and leaves an already aligned offset unchanged', () => {
+    const buffer = new ArrayBuffer(90)
+    const view = new DataView(buffer)
+    view.setUint32(0, 0x47475546) // GGUF
+    view.setUint32(4, 3, true)
+    view.setBigUint64(8, 1n, true)
+    view.setBigUint64(16, 1n, true)
+
+    // general.alignment is a UINT32 value of 64.
+    const key = new TextEncoder().encode('general.alignment')
+    view.setBigUint64(24, BigInt(key.length), true)
+    new Uint8Array(buffer, 32, key.length).set(key)
+    view.setUint32(49, 4, true)
+    view.setUint32(53, 64, true)
+
+    // One F32 tensor named x; the descriptor ends at byte 90.
+    view.setBigUint64(57, 1n, true)
+    view.setUint8(65, 120)
+    view.setUint32(66, 1, true)
+    view.setBigUint64(70, 1n, true)
+    expect(ggufMetadata(buffer).dataOffset).toBe(128)
+
+    view.setUint32(53, 2, true)
+    expect(ggufMetadata(buffer).dataOffset).toBe(90)
+
+    // Large valid alignments must not overflow signed 32-bit arithmetic.
+    view.setUint32(53, 0x80000000, true)
+    expect(ggufMetadata(buffer).dataOffset).toBe(0x80000000)
+
+    view.setUint32(53, 0, true)
+    expect(() => ggufMetadata(buffer)).toThrow('Invalid general.alignment')
+    view.setUint32(53, 3, true)
+    expect(() => ggufMetadata(buffer)).toThrow('Invalid general.alignment')
+    view.setUint32(53, 64, true)
+    view.setUint32(49, 5, true) // INT32 is not a valid alignment type.
+    expect(() => ggufMetadata(buffer)).toThrow('Invalid general.alignment')
   })
 
   it.each([2, 3])('accepts GGUF version %i', (version) => {
@@ -281,6 +338,7 @@ describe('ggufMetadata function', () => {
     expect(ggufMetadata(buffer)).toEqual({
       metadata: { version, tensorCount: 0 },
       tensorInfos: [],
+      dataOffset: 24,
     })
   })
 
