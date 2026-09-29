@@ -13,7 +13,7 @@ describe('ggufMetadata function', () => {
     view.setUint8(1, 'G'.charCodeAt(0))
     view.setUint8(2, 'U'.charCodeAt(0))
     view.setUint8(3, 'F'.charCodeAt(0))
-    view.setUint32(4, 1, true) // version
+    view.setUint32(4, 2, true) // version
     view.setBigUint64(8, 0n, true) // tensorCount
     view.setBigUint64(16, 1n, true) // metadataKVCount
 
@@ -155,6 +155,27 @@ describe('ggufMetadata function', () => {
 
     const { metadata } = ggufMetadata(buffer)
     expect(metadata[key]).toEqual(text)
+  })
+
+  it.each([2, 3])('accepts GGUF version %i', (version) => {
+    const buffer = new ArrayBuffer(24)
+    const view = new DataView(buffer)
+    view.setUint32(0, 0x47475546) // GGUF
+    view.setUint32(4, version, true)
+
+    expect(ggufMetadata(buffer)).toEqual({
+      metadata: { version, tensorCount: 0 },
+      tensorInfos: [],
+    })
+  })
+
+  it.each([0, 1, 4, 99, 0xffffffff, 0x03000000])('rejects GGUF version %i before reading counts', (version) => {
+    const buffer = new ArrayBuffer(8)
+    const view = new DataView(buffer)
+    view.setUint32(0, 0x47475546) // GGUF
+    view.setUint32(4, version, true)
+
+    expect(() => ggufMetadata(buffer)).toThrow('Unsupported GGUF version: ' + version)
   })
 
   it('throws an error for non-GGUF file', () => {

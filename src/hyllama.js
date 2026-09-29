@@ -77,6 +77,7 @@ export function ggufMetadata(arrayBuffer) {
   // read the header
   if (view.getUint32(0) !== 1195857222) throw new Error('Not a valid GGUF file') // "GGUF" header
   const version = view.getUint32(4, true)
+  if (version !== 2 && version !== 3) throw new Error('Unsupported GGUF version: ' + version)
   const tensorCount = view.getBigUint64(8, true)
   const metadataKVCount = view.getBigUint64(16, true)
 
