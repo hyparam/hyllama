@@ -7,7 +7,7 @@
 export function ggufMetadata(arrayBuffer) {
   // DataView for easier manipulation of the buffer
   const view = new DataView(arrayBuffer)
-  const utf8 = new TextDecoder()
+  const utf8 = new TextDecoder('utf-8', { ignoreBOM: true })
 
   /**
    * Helper function to read string from DataView
